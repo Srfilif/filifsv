@@ -1,0 +1,621 @@
+/**
+ * by Helton MALAMBANE
+ */
+if (typeof jQuery === 'undefined'){
+    throw new Error('jquery-rate-picker requires jQuery');
+}
+(function ($){
+    "use strict";
+    $.ratePicker = function (target, options){
+        if (typeof options === 'undefined') options = {};
+        options.max = typeof options.max === 'undefined' ? 5 : options.max;
+        options.rgbOn = typeof options.rgbOn === 'undefined' ? "#f1c40f" : options.rgbOn;
+        options.rgbOff = typeof options.rgbOff === 'undefined' ? "#ecf0f1" : options.rgbOff;
+        options.rgbSelection = typeof options.rgbSelection === 'undefined' ? "#ffcf10" : options.rgbSelection;
+        options.cursor = typeof options.cursor === 'undefined' ? "pointer" : options.cursor;
+        options.indicator = typeof options.indicator === 'undefined' ? "fa fa-star" : "fa "+options.indicator;
+
+        var stars = typeof $(target).data('stars') == 'undefined' ? 0 : $(target).data('stars');
+
+        $(target).css('cursor', options.cursor);
+        $(target).append($("<input>", {type : "hidden", name : target.replace("#", ""), value : stars}));
+
+        $(target).append($("<i>", {class : options.indicator, style : "color: transparent;"}));
+        for (var i = 1; i <= options.max; i++){
+            $(target).append($("<i>", {class : options.indicator, style : "color:" + (i <= stars ? options.rgbOn : options.rgbOff)}));
+        }
+        $(target).append($("<i>", {class : options.indicator, style : "color: transparent;"}));
+
+        $.each($(target + " > i"), function (index, item){
+            $(item).click(function (){
+                $("[name=" + target.replace("#", "") + "]").val(index);
+                for (var i = 1; i <= options.max; i++){
+                    $($(target + "> i")[i]).css("color", i <= index ? options.rgbOn : options.rgbOff);
+                }
+                if (!(options.rate === 'undefined')){
+                    options.rate(index > options.max ? options.max : index);
+                    stars = index;
+                }
+            });
+            $(item).mouseover(function (){
+                for (var i = 1; i <= options.max; i++){
+                    $($(target + " > i")[i]).css("color", i <= index ? options.rgbSelection : options.rgbOff);
+                }
+            });
+            $(item).mouseleave(function(){
+                $("[name=" + target.replace("#", "") + "]").val(index);
+                for (var i = 1; i <= options.max; i++){
+                    $($(target + "> i")[i]).css("color", i <= stars ? options.rgbOn : options.rgbOff);
+                }
+            });
+        });
+    };
+})(jQuery);
+
+
+/**
+ * COOKIES: Read and Write
+ * Plugin Admin Cookies
+ * Developed by Github
+ */
+var createCookie = function(name, value, days) {
+    var expires;
+    if (days) {
+        var date = new Date();
+        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+        expires = "; expires=" + date.toGMTString();
+    }
+    else {
+        expires = "";
+    }
+    document.cookie = name + "=" + value + expires + "; path=/";
+}
+function getCookie(c_name) {
+    if (document.cookie.length > 0) {
+        c_start = document.cookie.indexOf(c_name + "=");
+        if (c_start != -1) {
+            c_start = c_start + c_name.length + 1;
+            c_end = document.cookie.indexOf(";", c_start);
+            if (c_end == -1) {
+                c_end = document.cookie.length;
+            }
+            return unescape(document.cookie.substring(c_start, c_end));
+        }
+    }
+    return "";
+}
+
+jQuery(document).ready(function($){
+
+    /*
+ Plugin for lazy loading images
+
+ @link https://github.com/nechehin/lazyload
+*/
+
+(function(a) {
+    "function" === typeof define && define.amd ? define(["jquery"], a) : "object" === typeof module && module.exports ? module.exports = function(g, f) {
+        void 0 === f && (f = "undefined" !== typeof window ? require("jquery") : require("jquery")(g));
+        a(f);
+        return f
+    } : a(jQuery)
+})(function(a) {
+    var g = a(window),
+        f = g.width(),
+        k = g.height();
+    g.on("resize", function() {
+        f = g.width();
+        k = g.height()
+    });
+    a.fn.lazyload = function(d) {
+        function b(a) {
+            var c = a.tagName.toLowerCase(),
+                b = a.getAttribute("data-src");
+            "img" === c ? (a.src = b, a.getAttribute("data-srcset") &&
+                (a.srcset = a.getAttribute("data-srcset"))) : "iframe" === c ? a.src = b : a.backgroundImage = "url(" + b + ")"
+        }
+
+        function f() {
+            c.pageYOffset = window.pageYOffset;
+            c.pageXOffset = window.pageXOffset;
+            var b = 0;
+            h.each(function() {
+                var e = a(this);
+                if (!(c.skip_invisible && !e.is(":visible") || a.abovethetop(this, c) || a.leftofbegin(this, c)))
+                    if (!a.belowthefold(this, c) && !a.rightoffold(this, c)) e.trigger("appear"), b = 0;
+                    else if (++b > c.failure_limit) return !1
+            })
+        }
+        var h = this,
+            c = {
+                threshold: 0,
+                failure_limit: 0,
+                event: "scroll",
+                container: window,
+                skip_invisible: !1,
+                appear: null,
+                load: null,
+                allowIntersectionMode: !0,
+                placeholder: "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7",
+                pageXOffset: !1,
+                pageYOffset: !1
+            };
+        d && a.extend(c, d);
+        var l = c.allowIntersectionMode && "IntersectionObserver" in window && 0 === c.event.indexOf("scroll");
+        if (l) {
+            d = {};
+            c.container !== window && (d.root = "undefined" === typeof c.container[0] ? c.container : c.container[0]);
+            var k = new IntersectionObserver(function(a) {
+                    [].forEach.call(a, function(a) {
+                        !1 !== a.isIntersecting && (b(a.target), k.unobserve(a.target))
+                    })
+                },
+                d)
+        } else var m = void 0 === c.container || c.container === window ? g : a(c.container);
+        if (0 === c.event.indexOf("scroll") && !l) m.on(c.event, function() {
+            return f()
+        });
+             var imagestr = $('img.cpt').attr('data-src');
+             $('img.cpt').attr('src', imagestr);
+             $('#cpt').removeClass('cpt');
+
+        this.each(function() {
+            var e = this;
+            
+            e.loaded = !1;
+            null === e.getAttribute("src") && "IMG" === e.tagName && (e.src = c.placeholder);
+            if (l) k.observe(e);
+            else {
+                var d = a(e);
+                d.one("appear", function() {
+                    if (!this.loaded) {
+                        if (c.appear) {
+                            var d = h.length;
+                            c.appear.call(e, d, c)
+                        }
+                        b(e);
+                        e.loaded = !0;
+                        d = a.grep(h, function(a) {
+                            return !a.loaded
+                        });
+                        h = a(d);
+                        c.load && (d = h.length, c.load.call(e, d, c))
+                    }
+                });
+                0 !==
+                    c.event.indexOf("scroll") && e.addEventListener(c.event, function() {
+                        e.loaded || d.trigger("appear")
+                    })
+            }
+        });
+        if (!l) {
+            window.addEventListener("resize", function() {
+                f()
+            });
+            if (/(?:iphone|ipod|ipad).*os 5/gi.test(navigator.appVersion)) g.on("pageshow", function(b) {
+                b.originalEvent && b.originalEvent.persisted && h.each(function() {
+                    a(this).trigger("appear")
+                })
+            });
+            a(function() {
+                f()
+            })
+        }
+        return this
+    };
+    a.belowthefold = function(d, b) {
+        return (void 0 === b.container || b.container === window ? k + b.pageYOffset : a(b.container).offset().top + a(b.container).height()) <=
+            a(d).offset().top - b.threshold
+    };
+    a.rightoffold = function(d, b) {
+        return (void 0 === b.container || b.container === window ? f + b.pageXOffset : a(b.container).offset().left + a(b.container).width()) <= a(d).offset().left - b.threshold
+    };
+    a.abovethetop = function(d, b) {
+        return (void 0 === b.container || b.container === window ? b.pageYOffset : a(b.container).offset().top) >= a(d).offset().top + b.threshold + d.clientHeight
+    };
+    a.leftofbegin = function(d, b) {
+        return (void 0 === b.container || b.container === window ? b.pageXOffset : a(b.container).offset().left) >=
+            a(d).offset().left + b.threshold + d.clientWidth
+    }
+});
+
+
+
+    $('.lazy').lazyload();
+
+
+    /*COOKIES COLOR THEME DATK LIGHT*/
+    $('body').on('click','.light-mode', function(event) {
+        if($('.light-mode').hasClass('on')) {
+           setCookie('theme', 'light', 365);
+        } else{
+            setCookie('theme', 'dark', 365); 
+        }
+    }); 
+
+    $('body').on('click','.dark-mode', function(event) {
+        if($('.dark-mode').hasClass('on')) {
+           
+            setCookie('theme', 'dark', 365);
+        } else{
+           setCookie('theme', 'light', 365);
+        }
+    });   
+
+
+
+
+    /*Header*/
+    $(window).scroll(function(){
+        if ($(this).scrollTop() > 50) {
+           $('.hd').addClass('fx');
+        } else {
+           $('.hd').removeClass('fx');
+        }
+    });    
+
+    /*Dropdown*/
+    $('.aa-drp').each(function() {
+        var $AADrpdwn = $(this);
+        $('.aa-lnk', $AADrpdwn).click(function(e){
+            e.preventDefault();
+            $AADrpdDv = $('.aa-cnt', $AADrpdwn);
+            $AADrpdDv.parent('.aa-drp').toggleClass('on');
+            $('.aa-cnt').not($AADrpdDv).parent('.aa-drp').removeClass('on');
+            return false;
+        });
+    });
+    $(document).on('click', function(e){
+        if ($(e.target).closest('.aa-cnt').length === 0) {
+            $('.aa-cnt').parent('.aa-drp').removeClass('on');
+        }
+    });
+	
+	$('.servers-options ul li').on('click', function(e){
+		e.preventDefault();
+		$(this).parent().find('li').removeClass('on');
+        $(this).addClass('on');
+		var player_id = $(this).data('playerid');
+		$('.video').html('<iframe allow="autoplay class="iframe-loading" src="' + player_id + '" width="100%" height="100%" scrolling="no" frameborder="0" allowfullscreen="" webkitallowfullscreen="" mozallowfullscreen=""></iframe>');
+	});
+    $(document).on('click', '.list-players a', function(event) {
+        event.preventDefault();
+        $('.list-players a').removeClass('on');
+        var player_id = $(this).data('playerid');
+        $('.video').html('<iframe allow="autoplay class="iframe-loading" src="' + player_id + '" width="100%" height="100%" scrolling="no" frameborder="0" allowfullscreen="" webkitallowfullscreen="" mozallowfullscreen=""></iframe>');
+        $(this).addClass('on');
+    });
+
+	
+	$('#opfk').on('click',  function(event) {
+        $(".servers-options ul li:first-child").click();
+    });
+
+    $('.init-repro').on('click',  function(event) {
+        $(".list-players a:first-child").click();
+    });
+
+    $('.player-init').on('click', function(event) {
+        event.preventDefault();
+        /* Act on the event */
+		console.log('al');
+         $(".servers-options ul li:first-child").click();
+    });
+       
+
+	/*$(".servers-options ul li:first-child").click();*/
+        
+    /*Toggle*/
+    $('.aa-tgl').on('click', function(){
+        var shwhdd = $(this).attr('data-tgl');
+        $('#'+shwhdd).toggleClass('on');
+        $(this).toggleClass('on');
+    });
+    $('#menu-btn').on('click', function(event) {
+        event.preventDefault();
+        $('#hd').removeClass('on');
+        $('#search-btn').removeClass('on');
+        $('#aa-wp').toggleClass('on');
+        $(this).toggleClass('on');
+    });
+    $('#search-btn').on('click', function(event) {
+        event.preventDefault();
+        $('#aa-wp').removeClass('on');
+        $('#menu-btn').removeClass('on');
+        $('#hd').toggleClass('on');
+        $(this).toggleClass('on');
+    });
+
+    /*Modal*/
+    $('.aa-mdl').on('click', function(){
+        var shwhddb = $(this).attr('data-mdl');
+        $('#'+shwhddb).toggleClass('on');
+        $('body').toggleClass('mdl-on');
+        $(this).toggleClass('on');
+    });
+    $(document).keyup(function(e){
+        if (e.keyCode === 27) {
+            $('body').removeClass('mdl-on');
+            $('.mdl').removeClass('on');
+        }
+    });
+
+    /*Tabs*/
+    $('.aa-tbs a').click(function(e){
+        e.preventDefault();
+        var $this = $(this),
+            tabgroup = '#'+$this.parents('.aa-tbs').data('tbs'),
+            others = $this.closest('li').siblings().children('a'),
+            target = $this.attr('href');
+        others.removeClass('on');
+        $this.addClass('on');
+        $(tabgroup).children().removeClass('on');
+        $(target).addClass('on');
+    });  
+
+    /*carousel*/
+    $('.latest-movies').slick({
+        dots: true,
+        arrows: false,
+        fade: true,
+        slidesToShow: 1,
+        slidesToScroll: 1,
+        infinite: false
+    });
+
+
+    $('body').on('click', '.change-season', function(event) {
+        event.preventDefault();
+        var season = $(this).attr('data-temporada');
+        var serie_id = $('#serie-master').attr('data-id');
+        $('.change-season').removeClass('on');
+        $(this).addClass('on');
+        $.ajax({
+            url     : peli.url,
+            method  : 'POST',
+            data    : {
+                action          : 'action_change_episode',
+                season: season,
+                serie_id: serie_id
+            }, 
+            beforeSend: function(){
+                console.log('cargando');
+            },
+            success: function( data ) {
+                console.log(data);
+                $('#option-1').html(data);
+            },
+            error: function(){
+                console.log('error');
+            }
+        });
+    });
+
+
+    $.ratePicker("#demo", {
+        rate : function (stars){
+            var id = $('#demo').data('id');
+            if( getCookie('vote_ep') == id ){ return; }
+            
+            $.ajax({
+                url     : peli.url,
+                method  : 'POST',
+                dataType: 'json',
+                data    : {
+                    action: 'action_vote_episode',
+                    id    : id,
+                    stars : stars
+                }, 
+                beforeSend: function(){
+                },
+                success: function( data ) {
+                    console.log(data);
+                    createCookie('vote_ep', id);
+                    $('#r-a').text(data.prom);
+                    $('#r-c').text(data.numvote);
+                    $('#demo').attr('data-stars', data.prom);
+                    $('#r-b').attr('stroke-dasharray', data.percentage + ',100');
+                    $('#r-a').text(data.prom);
+                },
+                error: function(){
+                }
+            });
+            console.log(stars);
+        }
+    });
+
+    $.ratePicker("#demom", {
+        rate : function (stars){
+            var id = $('#demom').data('id');
+            if( getCookie('vote_ep') == id ){ return; }
+            
+            $.ajax({
+                url     : peli.url,
+                method  : 'POST',
+                dataType: 'json',
+                data    : {
+                    action: 'action_vote_serie',
+                    id    : id,
+                    stars : stars
+                }, 
+                beforeSend: function(){
+                },
+                success: function( data ) {
+                    console.log(data);
+                    createCookie('vote_ep', id);
+                    $('#r-a').text(data.prom);
+                    $('#r-c').text(data.numvote);
+                    $('#demo').attr('data-stars', data.prom);
+                    $('#r-b').attr('stroke-dasharray', data.percentage + ',100');
+                    $('#r-a').text(data.prom);
+                },
+                error: function(){
+                }
+            });
+            console.log(stars);
+        }
+    });
+
+
+    //PAGINATION AJAX
+    $('body').on('click', '#load-more-ajax', function(event) {
+        event.preventDefault();
+        var page = $(this).attr('data-page');
+        var next = parseInt(page) + parseInt(1);
+        var types = $(this).attr('data-type');
+        $.ajax({
+            url     : peli.url,
+            method  : 'POST',
+            data    : {
+                action : 'action_sorting_post',
+                page   : page,
+                types  : types
+            }, 
+            beforeSend: function(){
+                console.log('cargando');
+                var html = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid" class="lds-eclipse" style="background: none;"><path ng-attr-d="{{config.pathCmd}}" ng-attr-fill="{{config.color}}" stroke="none" d="M10 50A40 40 0 0 0 90 50A40 44 0 0 1 10 50" fill="var(--primary)" transform="rotate(49.1396 50 52)"><animateTransform attributeName="transform" type="rotate" calcMode="linear" values="0 50 52;360 50 52" keyTimes="0;1" dur="1s" begin="0s" repeatCount="indefinite"></animateTransform></path></svg>';
+                $('.load_more').append(html);
+            },
+            success: function( data ) {
+                console.log(data);
+                /*$('.paginavi').remove();*/
+                $('svg').remove();
+                $('.grid.list').hide().fadeIn(1000).append(data);
+                $('#load-more-ajax').attr('data-page', next);
+            },
+            error: function(){
+                console.log('error');
+            }
+        });
+    });
+
+
+    //Filter by Genre
+    $('.genre-select input').on('click', function(event) {
+        var $this = $(this);
+        var page = 1;
+
+        var genre = [];
+
+        $( '.genre-select input' ).each(function( index ) {
+            if( $(this).is(':checked') ) {
+                genre.push($(this).val());
+            }
+        });
+
+        console.log(genre);
+
+        /*var year = $('.year-ul').find('.on a').data('id');
+        var order = $('.order-ul').find('.on a').data('id');
+        var search = niter_Public.search;
+        var release = niter_Public.release;
+
+        var actor = $('.results').data('actor');
+        var director = $('.results').data('director');*/
+       
+        $.ajax({
+            url  : peli.url,
+            type : 'post',
+            data : {
+                action    : 'action_filter',
+                /*query_vars: niter_Public.query_vars,*/
+                page      : page,
+                genre     : genre,
+                /*year      : year,
+                order     : order,
+                search    : search,
+                actor     : actor,
+                director  : director,
+                release: release*/
+            },
+            beforeSend: function(){
+                console.log('cargando');
+            },
+            success: function( data ) {
+                console.log(data);
+                /*$('.paginavi').remove();*/
+                $('.grid.list').hide().fadeIn(1000).html(data);
+            },
+            error: function(){
+                console.log('error');
+            }
+        });
+    });
+
+
+    /*$('body').on('click', '.load-pagination-home', function(event) {
+        event.preventDefault();
+        var $this = $(this),
+        number    = $this.attr('number'),
+        paged     = $this.attr('paged'),
+        postype   = $this.attr('postype');
+
+        var np = parseInt(paged) + parseInt(1);
+
+        $.ajax({
+            url   : peli.url,
+            method: 'POST',
+            data  : {
+                action : 'action_load_pagination_home',
+                number : number,
+                paged  : paged,
+                postype: postype
+            }, 
+            beforeSend: function(){
+                console.log('cargando');
+                $this.append('<img style="width: 26px; margin-left: 5px;" src="'+peli.load+'">');
+            },
+            success: function( data ) {
+                console.log(data);
+                $this.parent().prev().append(data);
+                $this.attr('paged', np);
+                $this.find('img').remove();
+            },
+            error: function(){
+                console.log('error');
+            }
+        });
+        
+
+    });*/
+
+
+     /*GESTORES DE COOKIES*/
+    function setCookie(cname, cvalue, exdays) {
+        var d = new Date();
+        d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
+        var expires = "expires=" + d.toUTCString();
+        document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+    }
+    function getCookie(cname) {
+        var name = cname + "=";
+        var decodedCookie = decodeURIComponent(document.cookie);
+        var ca = decodedCookie.split(';');
+        for (var i = 0; i < ca.length; i++) {
+            var c = ca[i];
+            while (c.charAt(0) === ' ') {
+                c = c.substring(1);
+            }
+            if (c.indexOf(name) === 0) {
+                return c.substring(name.length, c.length);
+            }
+        }
+        return "";
+    }
+
+    if(getCookie('theme')=='dark' || getCookie('theme')=='light') {
+        if(getCookie('theme')=='dark') {
+            $('body').addClass('drk-on');
+            $('.aa-drk').addClass('on').removeClass('off');
+        }
+    } else{
+        if(peli.theme_dark == 1) {
+            $('body').addClass('drk-on');
+            $('.aa-drk').addClass('on').removeClass('off');
+        }
+    }
+    
+
+
+});
+
